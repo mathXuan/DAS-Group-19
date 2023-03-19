@@ -141,21 +141,21 @@ library(jtools)
 skim(animals)
 
 #ggpairs(animals)
-#month和year两个变量完全分离，且month变量下time_at_shelter变化不大，只使用year作为explanatory variable
+#The month and year are separated, and the time_at_shelter does not change much under the month variable, so only the year is used as the explanatory variable.
 animals$month <- as.character(animals$month)
 animals$year <- as.character(animals$year)
 
-#考虑所有变量，拟合进counts数据型下的genralised linear regression model
-#所有变量均为分类变量
+#Fitting a generalised linear regression model for the Counts datatype, given all variables
+#full model: use all variables
 mod.loglinear <- glm(time_at_shelter ~ year + animal_type + intake_type + outcome_type 
                  + chip_status, data = animals, family = poisson())
-#输出模型的回归系数以及p-value
-#对结果进行分析，考虑z statistic和p-value的值，提供以下处理方法：
-#1. 对animal_type数据进行处理，WILDLIFE和BIRD之间似乎没有显著差异考虑归为一类
-#2. 不对animal_type进行拟合
-#3. 不对year进行拟合
-#4. 在1的处理上不对year进行拟合
-#5. 在2的处理上不对year进行拟合
+#print the regression coefficient and the p-value
+#Analyse the result, considering the values of z statistic and p-value, to provide the following treatment.
+#1.no significant difference between WILDLIFE and BIRD when animal_type data is processed, so consider grouping them together
+#2.no fit to animal_type
+#3.no fit to year
+#4.no fit to year based on treatment 1
+#5.no fit to year based on treatment 2
 summary(mod.loglinear)
 AIC(mod.loglinear)
 
@@ -189,10 +189,10 @@ summary(mod.loglinear5)
 #model selection: Minimize AIC
 AIC(mod.loglinear)
 AIC(mod.loglinear1,mod.loglinear2,mod.loglinear3,mod.loglinear4,mod.loglinear5)
-#综合考虑模型的复杂度以及系数的显著性选择4方法进行处理
+#Considering the complexity of all models and the significance of the coefficients, method 4 was chosen.
 summary(mod.loglinear4)
 
-#解释模型
+#interpret the model
 #log—odds
 confint(mod.loglinear4)
 
@@ -200,10 +200,9 @@ install.packages("sjPlot")
 library(sjPlot)
 plot_model(mod.loglinear4, show.values = TRUE, transform = NULL,
            title = "Log-Odds", show.p = FALSE)
-#在原数据集上添加logmean列
+#Add logmean column to the original dataset
 animals <- animals %>%
   mutate(logmean = predict(mod.loglinear4))
-#查看animals的新增列，根据lab上的相关内容进行解释
 
 #RR_—— rate ratio
 mod.loglinear4 %>%
@@ -211,16 +210,16 @@ mod.loglinear4 %>%
   exp()
 
 plot_model(mod.loglinear4, show.values = TRUE,, show.p = FALSE)
-#在原数据集上添加rate-ratio列
+#Add rate-ratio column to the original dataset
 animals <- animals %>%
   mutate(rate-ratio = exp(logodds))
 
 #COUNTS
-#在原数据集上添加probability列
-#notes:Poisson分布和二项分布的区别
-#在Poisson分布中,由于结果不是概率,所以解释为E(y)=u=n*theta,在这个案例中,不考虑不同的exposure,所以counts=u
+#Add the probability column to the original dataset
+#In the Poisson distribution, since the outcome variable is not the probability, it is interpreted as E(y)=u=n*theta
+#in this case without considering the different exposures, so counts=u.
 animals <- animals %>%
   mutate(counts_pred = fitted(mod.loglinear4))
 
-#将拟合结果可视化
+#Visualize the fit results
 plot_model(mod.loglinear4,type = "pred")
