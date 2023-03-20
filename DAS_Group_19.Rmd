@@ -14,10 +14,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-The question for Group 19 is: Which factors influence the number of days an animal spends in the shelter before their final outcome is decided?
+The question for Group 19 is: Which factors influence the number of days an animal spends in the shelter before their final outcome is decided
 
-We start by loading the required packages.
-```{r libraries,echo=TRUE,warning=FALSE,message=FALSE}
+
+```{r libraries,echo=FALSE,warning=FALSE,message=FALSE}
 library(ggplot2)
 library(tidyverse)
 library(dplyr)
@@ -27,15 +27,14 @@ library(sjPlot)
 library(stats)
 library(jtools)
 library(readr)
+library(patchwork)
 ```
 
-The data we are required to use is read below.
-
-```{r data processing,echo=TRUE,warning=FALSE,message=FALSE}
+```{r data processing,echo=FALSE,warning=FALSE,message=FALSE}
 animals<-read.csv("C:/Users/Yuchen/Documents/tmp/DAS-Group-19/dataset19.csv")
 ```
 
-And we should always view the whole data at first.
+We start by viewing the whole data at first.
 
 ```{r glimpse, echo=TRUE,eval=TRUE, include = TRUE}
 glimpse(animals)
@@ -46,54 +45,54 @@ We need to choose which GLM should be used for the model by plotting the densiti
 
 We first investigate what kind of density function y (time in the shelter) obeys
 
-The overall density function of time at shelter is plotted below
+The overall density function of time at shelter and the density functions for different animals are plotted below.
 
 ```{r densityy, echo=TRUE,eval=TRUE, include = TRUE}
-p<-ggplot(animals, aes(x = time_at_shelter))    
-p + geom_density(color = "black", fill = "gray")
+p1<-ggplot(animals, aes(x = time_at_shelter))+   
+  geom_density(color = "black", fill = "gray")+
+  labs(x = "time stay in shelter", y = "density",
+       title = "overall density function of time at shelter")
+
+p2<-ggplot(animals, aes(x = time_at_shelter))+ 
+  geom_density(aes(color = animal_type))+
+  labs(x = "time stay in shelter", y = "density",
+       title = "density functions for different animals")
+
+p1+p2+plot_layout(ncol = 1)
 ```
 
-The density functions for different animals are plotted below
-
-```{r densityanimals, echo=TRUE,eval=TRUE, include = TRUE}
-ggplot(animals, aes(x = time_at_shelter))+ 
-  geom_density(aes(color = animal_type))
-
-```
 As we can see, these two graphs have shown a typical poisson distribution which give us the direction of using the \textbf{logit link function} combined with the assumption that the response y (time at shelter) obeys the \textbf{poisson distribution} for \textbf{GLM} method later on.
 
 But we will still observe the distribution of each variable (via boxplots and histograms)
 
-Using boxplot for observing the time at shelter for different kinds of animals.
+Observing the time at shelter for different kinds of animals.
 
-```{r boxplotanimals, echo=TRUE,eval=TRUE, include = TRUE}
-ggplot(data = animals, mapping = aes(x = factor(animal_type), y = time_at_shelter)) +
+```{r animals, echo=TRUE,eval=TRUE, include = TRUE}
+p11<-ggplot(data = animals, mapping = aes(x = factor(animal_type), y = time_at_shelter)) +
   geom_boxplot(fill = "steelblue") +
   labs(x = "kind of animals", y = "time stay in shelter",
        title = "different animals in shelter")  
-```
 
-Observing the time at shelter for different kinds of animals by plotting the bar chart.
-
-```{r barchartanimals, echo=TRUE,eval=TRUE, include = TRUE}
-ggplot(data = animals, mapping = aes(x = factor(animal_type), y = time_at_shelter, fill = animal_type)) +
+p12<-ggplot(data = animals, mapping = aes(x = factor(animal_type), y = time_at_shelter, fill = animal_type)) +
   geom_col(position = "dodge") +
   labs(x = "kind of animals", y = "time stay in shelter",
        title = "different animals in shelter") 
+p11+p12
 ```
 
 Observing the time that animals stay in shelter in different month.
 
 ```{r month, echo=TRUE,eval=TRUE, include = TRUE}
-ggplot(data = animals, mapping = aes(x = factor(month), y = time_at_shelter, fill = month)) +
+p21<-ggplot(data = animals, mapping = aes(x = factor(month), y = time_at_shelter, fill = month)) +
   geom_col(position = "dodge") +
   labs(x = "month", y = "time stay in shelter",
        title = "the summary of months in time in shelter") 
 
-ggplot(data = animals, mapping = aes(x = factor(month), y = time_at_shelter)) +
+p22<-ggplot(data = animals, mapping = aes(x = factor(month), y = time_at_shelter)) +
   geom_boxplot(fill = "steelblue") +
   labs(x = "month", y = "time stay in shelter",
        title = "summary of month in time in shelter")
+p21+p22
 ```
 
 After visualizing the data, we fond that there was no obvious changes but slightly different between the \textbf{first half year} and the \textbf{second half year} so we may classify time into two parts. (The month from 1 to 6 will be labelled as first half year and the month from 7 to 12 will be labelled as second half year)
@@ -105,42 +104,45 @@ animals_used<-animals%>%
 
 Observing the time that animals stay in shelter related to intake type.
 
-```{r intake, echo=TRUE,eval=TRUE, include = FALSE}
-ggplot(data = animals, mapping = aes(x = factor(intake_type), y = time_at_shelter, fill = intake_type)) +
+```{r intake, echo=TRUE,eval=TRUE, include = TRUE}
+p31<-ggplot(data = animals, mapping = aes(x = factor(intake_type), y = time_at_shelter, fill = intake_type)) +
   geom_col(position = "dodge") +
   labs(x = "intake_type", y = "time stay in shelter",
        title = "the summary of intake_type in time in shelter") 
 
-ggplot(data = animals, mapping = aes(x = factor(intake_type), y = time_at_shelter)) +
+p32<-ggplot(data = animals, mapping = aes(x = factor(intake_type), y = time_at_shelter)) +
   geom_boxplot(fill = "steelblue") +
   labs(x = "intake_type", y = "time stay in shelter",
        title = "summary of intake_type in time in shelter") 
+p31+p32+plot_layout(ncol = 1)
 ```
 
 Observing the time that animals stay in shelter related to outcome type.
 
 ```{r outcome, echo=TRUE,eval=TRUE, include = TRUE}
-ggplot(data = animals, mapping = aes(x = factor(outcome_type), y = time_at_shelter, fill = month)) +
+p41<-ggplot(data = animals, mapping = aes(x = factor(outcome_type), y = time_at_shelter, fill = month)) +
   geom_col(position = "dodge") +
   labs(x = "outcome_type", y = "time stay in shelter",
        title = "the summary of outcome_type in time in shelter") 
-ggplot(data = animals, mapping = aes(x = factor(outcome_type), y = time_at_shelter)) +
+p42<-ggplot(data = animals, mapping = aes(x = factor(outcome_type), y = time_at_shelter)) +
   geom_boxplot(fill = "steelblue") +
   labs(x = "outcome_type", y = "time stay in shelter",
        title = "summary of outcome_type in time in shelter") 
+p41+p42+plot_layout(ncol = 1)
 ```
 
 Observing the time that animals stay in shelter related to chip status.
 
 ```{r chip, echo=TRUE,eval=TRUE, include = TRUE}
-ggplot(data = animals, mapping = aes(x = factor(chip_status), y = time_at_shelter, fill = chip_status)) +
+p51<-ggplot(data = animals, mapping = aes(x = factor(chip_status), y = time_at_shelter, fill = chip_status)) +
   geom_col(position = "dodge") +
   labs(x = "chip_status", y = "time stay in shelter",
        title = "the summary of chip_status in time in shelter") 
-ggplot(data = animals, mapping = aes(x = factor(chip_status), y = time_at_shelter)) +
+p52<-ggplot(data = animals, mapping = aes(x = factor(chip_status), y = time_at_shelter)) +
   geom_boxplot(fill = "steelblue") +
   labs(x = "chip_status", y = "time stay in shelter",
        title = "summary of ochip_status in time in shelter")
+p51+p52+plot_layout(ncol = 1)
 ```
 
 # Model Analysis
@@ -166,7 +168,7 @@ mod.loglinear <- glm(time_at_shelter ~ year + animal_type + intake_type + outcom
 summary(mod.loglinear)
 AIC(mod.loglinear)
 ```
-We fond that collinearity exists between different animal types. We then check the data grouped by animal type and fond that there were only 2 rows of data for \textbf{BIRD}. Since we know that small size of data would cause collinearity, we decided to include the data for BIRD into WILDLIFE.
+We fond that collinearity exists between different animal types. We then check the data grouped by animal type and fond that there were only 2 rows of data for \textbf{BIRD}. Since we know that small size of data would cause collinearity, we decided not to include the data for BIRD.
 
 ```{r Bird, echo=TRUE,eval=TRUE, include = TRUE}
 animals_used<-animals_used%>%
