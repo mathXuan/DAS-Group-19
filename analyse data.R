@@ -87,8 +87,8 @@ ggplot(data = animals, mapping = aes(x = factor(month), y = time_at_shelter, fil
   labs(x = "month", y = "time stay in shelter",
        title = "the summary of months in time in shelter") 
 
-ggplot(data = animals, mapping = aes(x = factor(month), y = time_at_shelter)) +
-  geom_boxplot(fill = "steelblue") +
+ggplot(data = animals,  mapping = aes(x = factor(month))) + 
+  geom_bar(stat = 'count',fill = "steelblue")+
   labs(x = "month", y = "time stay in shelter",
        title = "summary of month in time in shelter")
 
@@ -102,14 +102,14 @@ ggplot(data = animals, mapping = aes(x = factor(intake_type), y = time_at_shelte
   labs(x = "intake_type", y = "time stay in shelter",
        title = "the summary of intake_type in time in shelter") 
 
-ggplot(data = animals, mapping = aes(x = factor(intake_type), y = time_at_shelter)) +
-  geom_boxplot(fill = "steelblue") +
+ggplot(data = animals,  mapping = aes(x = factor(intake_type))) + 
+  geom_bar(stat = 'count',fill = "steelblue")+
   labs(x = "intake_type", y = "time stay in shelter",
        title = "summary of intake_type in time in shelter") 
 
 #4.study outcome_type
-ggplot(data = animals, mapping = aes(x = factor(outcome_type), y = time_at_shelter, fill = month)) +
-  geom_col(position = "dodge") +
+ggplot(data = animals,  mapping = aes(x = factor(outcome_type))) + 
+  geom_bar(stat = 'count',fill = "steelblue")+
   labs(x = "outcome_type", y = "time stay in shelter",
        title = "the summary of outcome_type in time in shelter") 
 
@@ -120,10 +120,10 @@ ggplot(data = animals, mapping = aes(x = factor(outcome_type), y = time_at_shelt
        title = "summary of outcome_type in time in shelter") 
 
 #5.study chip_status
-ggplot(data = animals, mapping = aes(x = factor(chip_status), y = time_at_shelter, fill = chip_status)) +
-  geom_col(position = "dodge") +
+ggplot(data = animals,  mapping = aes(x = factor(chip_status))) + 
+  geom_bar(stat = 'count',fill = "steelblue")+
   labs(x = "chip_status", y = "time stay in shelter",
-       title = "the summary of chip_status in time in shelter") 
+       title = "the summary of chip_status in time in shelter")
 
 #Study with boxplot
 ggplot(data = animals, mapping = aes(x = factor(chip_status), y = time_at_shelter)) +
