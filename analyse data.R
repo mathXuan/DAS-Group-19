@@ -130,6 +130,13 @@ ggplot(data = animals, mapping = aes(x = factor(chip_status), y = time_at_shelte
   geom_boxplot(fill = "steelblue") +
   labs(x = "chip_status", y = "time stay in shelter",
        title = "summary of ochip_status in time in shelter")
+#6.study year
+ggplot(data = animals, mapping = aes(x = factor(year), y = time_at_shelter)) +
+  geom_boxplot(fill = "steelblue") +
+  labs(x = "year", y = "time stay in shelter",
+       title = "summary of year in time in shelter")
+
+
 
 
 #Formal analysis
